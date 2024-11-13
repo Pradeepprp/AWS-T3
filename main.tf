@@ -1,9 +1,9 @@
 provider "aws" {
-  region = "us-east-1"  
+  region = var.region
 }
 
 resource "aws_vpc" "main" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = var.cidr_block
 
   tags = {
     Name = "MainVPC"
@@ -30,7 +30,7 @@ resource "aws_customer_gateway" "example" {
   }
 }
 
-# Create a VPN Connection
+# Create a VPN Connection. The below VPN connection is used to establish a secure tunnel between AWS environment(via a VPN Gateway) and on-premises network(via the Customer Gateway)
 resource "aws_vpn_connection" "example" {
   vpn_gateway_id      = aws_vpn_gateway.vpn.id
   customer_gateway_id = aws_customer_gateway.example.id
