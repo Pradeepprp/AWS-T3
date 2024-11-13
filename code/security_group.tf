@@ -1,28 +1,36 @@
-# Security Group for Public Subnet
+# Security Group for Public Subnets (Public Access)
 resource "aws_security_group" "public_sg" {
   vpc_id = aws_vpc.main.id
-
-  # Allow HTTP and HTTPS traffic
+  description = "Security group for public subnets across AZs"
+  
+  # Allow HTTP (80) and HTTPS (443) inbound from anywhere
   ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow all IPs
+    cidr_blocks = ["0.0.0.0/0"]
   }
-
   ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Allow all IPs
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Outbound rules for Public SG
+  # Allow SSH (22) inbound from specific IP range for admin access
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Replace with your admin IP range
+  }
+
+  # Outbound rule to allow all traffic
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # Allow all outbound traffic
-    cidr_blocks = ["0.0.0.0/0"]  # Allow all IPs
+    protocol    = "-1" # All protocols
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
@@ -30,29 +38,33 @@ resource "aws_security_group" "public_sg" {
   }
 }
 
-# Data source to reference the Public Security Group in the Private SG
-data "aws_security_group" "public_sg" {
-  id = aws_security_group.public_sg.id
-}
-
-# Security Group for Private Subnet
+# Security Group for Private Subnets (Internal Access)
 resource "aws_security_group" "private_sg" {
   vpc_id = aws_vpc.main.id
-
-  # Allow traffic from the public security group using the data source
+  description = "Security group for private subnets across AZs"
+  
+  # Example: Allow internal application traffic on port 8080 (adjust as needed)
   ingress {
-    from_port       = 0
-    to_port         = 65535
-    protocol        = "tcp"
-    security_groups = [data.aws_security_group.public_sg.id] # Use data source to get the Public SG ID
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"] # Adjust to your VPC CIDR block or internal subnets only
   }
 
-  # Allow outbound traffic to the Internet via NAT Gateway
+  # Example: Allow internal database access on port 3306 (MySQL) or 5432 (PostgreSQL)
+  ingress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["10.0.0.0/16"] # Adjust for specific internal traffic only
+  }
+
+  # Outbound rule to allow all traffic (or restrict further if needed)
   egress {
     from_port   = 0
     to_port     = 0
-    protocol    = "-1"  # Allow all outbound traffic
-    cidr_blocks = ["0.0.0.0/0"]  # Allow all IPs
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
