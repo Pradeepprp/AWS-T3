@@ -1,96 +1,47 @@
-
+# Get the list of availability zones
 data "aws_availability_zones" "available" {}
 
-# Create Subnets across two Availability Zones
-
-# Public Subnet in AZ1
-resource "aws_subnet" "public_subnet_az1" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidr_az1
-  availability_zone       = data.aws_availability_zones.available.names[0]
+# Create Public Subnets dynamically across the specified Availability Zones
+resource "aws_subnet" "public_subnet" {
+  count             = var.num_availability_zones # This will create subnets based on the number of AZs
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = element(
+    [
+      var.public_subnet_cidr_az1,
+      var.public_subnet_cidr_az2,
+      var.public_subnet_cidr_az3
+    ],
+    count.index
+  )
+  availability_zone = data.aws_availability_zones.available.names[count.index]
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "PublicSubnet-AZ1"
+    Name = "PublicSubnet-AZ${count.index + 1}"
   }
 }
 
-# Public Subnet in AZ2
-resource "aws_subnet" "public_subnet_az2" {
-  vpc_id                  = aws_vpc.main.id
-  cidr_block              = var.public_subnet_cidr_az2
-  availability_zone       = data.aws_availability_zones.available.names[1]
-  map_public_ip_on_launch = true
-
-  tags = {
-    Name = "PublicSubnet-AZ2"
-  }
-}
-
-# Private Subnets in AZ1 and AZ2
-
-# Private Subnet 1 in AZ1
-resource "aws_subnet" "private_subnet_az1_1" {
+# Create Private Subnets dynamically across the specified Availability Zones
+resource "aws_subnet" "private_subnet" {
+  count             = var.num_availability_zones * 3 # 3 private subnets per AZ
   vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az1_1
-  availability_zone = data.aws_availability_zones.available.names[0]
+  cidr_block        = element(
+    [
+      var.private_subnet_cidr_az1_1,
+      var.private_subnet_cidr_az1_2,
+      var.private_subnet_cidr_az1_3,
+      var.private_subnet_cidr_az2_1,
+      var.private_subnet_cidr_az2_2,
+      var.private_subnet_cidr_az2_3,
+      var.private_subnet_cidr_az3_1,
+      var.private_subnet_cidr_az3_2,
+      var.private_subnet_cidr_az3_3
+    ],
+    count.index
+  )
+  availability_zone = data.aws_availability_zones.available.names[count.index % var.num_availability_zones] # Loops through AZs
 
   tags = {
-    Name = "PrivateSubnet-1-AZ1"
-  }
-}
-
-# Private Subnet 2 in AZ1
-resource "aws_subnet" "private_subnet_az1_2" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az1_2
-  availability_zone = data.aws_availability_zones.available.names[0]
-
-  tags = {
-    Name = "PrivateSubnet-2-AZ1"
-  }
-}
-
-# Private Subnet 3 in AZ1
-resource "aws_subnet" "private_subnet_az1_3" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az1_3
-  availability_zone = data.aws_availability_zones.available.names[0]
-
-  tags = {
-    Name = "PrivateSubnet-3-AZ1"
-  }
-}
-
-# Private Subnet 1 in AZ2
-resource "aws_subnet" "private_subnet_az2_1" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az2_1
-  availability_zone = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "PrivateSubnet-1-AZ2"
-  }
-}
-
-# Private Subnet 2 in AZ2
-resource "aws_subnet" "private_subnet_az2_2" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az2_2
-  availability_zone = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "PrivateSubnet-2-AZ2"
-  }
-}
-
-# Private Subnet 3 in AZ2
-resource "aws_subnet" "private_subnet_az2_3" {
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = var.private_subnet_cidr_az2_3
-  availability_zone = data.aws_availability_zones.available.names[1]
-
-  tags = {
-    Name = "PrivateSubnet-3-AZ2"
+    Name = "PrivateSubnet-${count.index + 1}-AZ${count.index % var.num_availability_zones + 1}"
   }
 }

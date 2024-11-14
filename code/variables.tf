@@ -3,7 +3,11 @@ variable "region" {
   type        = string
   default     = "us-east-1"  # Optional default region
 }
-
+variable "num_availability_zones" {
+  description = "Number of Availability Zones to use"
+  type        = number
+  default     = 2  # Default to 2 AZs
+}
 variable "cidr_block" {
   description = "CIDR block for the VPC"
   type        = string
@@ -18,6 +22,10 @@ variable "public_subnet_cidr_az1" {
 
 variable "public_subnet_cidr_az2" {
   description = "CIDR block for the public subnet in AZ2"
+  type        = string
+}
+variable "public_subnet_cidr_az3" {
+  description = "CIDR block for the public subnet in AZ3"
   type        = string
 }
 
@@ -50,6 +58,21 @@ variable "private_subnet_cidr_az2_2" {
 
 variable "private_subnet_cidr_az2_3" {
   description = "CIDR block for the third private subnet in AZ2"
+  type        = string
+}
+# Private Subnets in AZ3
+variable "private_subnet_cidr_az3_1" {
+  description = "CIDR block for the first private subnet in AZ3"
+  type        = string
+}
+
+variable "private_subnet_cidr_az3_2" {
+  description = "CIDR block for the second private subnet in AZ3"
+  type        = string
+}
+
+variable "private_subnet_cidr_az3_3" {
+  description = "CIDR block for the third private subnet in AZ3"
   type        = string
 }
 
