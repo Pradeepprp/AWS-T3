@@ -1,6 +1,7 @@
 # Security Group for Public Subnets (Public Access)
 resource "aws_security_group" "public_sg" {
   vpc_id = aws_vpc.main.id
+  depends_on = [aws_vpc.main]
   description = "Security group for public subnets across AZs"
   
   # Allow HTTP (80) and HTTPS (443) inbound from anywhere

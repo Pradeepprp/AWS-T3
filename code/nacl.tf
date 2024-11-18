@@ -1,6 +1,6 @@
 # Public NACL for Subnets in Public Subnets (one per AZ)
 resource "aws_network_acl" "public_nacl" {
-  count   = 3
+  count   = var.num_availability_zones
   vpc_id  = aws_vpc.main.id
 
   tags = {
@@ -14,13 +14,13 @@ resource "aws_network_acl" "private_nacl" {
   vpc_id  = aws_vpc.main.id
 
   tags = {
-    Name = "PrivateNACL-AZ${count.index + 1}"
+    Name = "PrivateNACL-AZ${floor(count.index / 3) + 1}-Subnet${count.index % 3 + 1}"
   }
 }
 
 # Rules for Public NACLs (HTTP, HTTPS, Outbound)
 resource "aws_network_acl_rule" "allow_http_public" {
-  count          = 3
+  count          = var.num_availability_zones
   network_acl_id = aws_network_acl.public_nacl[count.index].id
   rule_number    = 100
   egress         = false
@@ -32,7 +32,7 @@ resource "aws_network_acl_rule" "allow_http_public" {
 }
 
 resource "aws_network_acl_rule" "allow_https_public" {
-  count          = 3
+  count          = var.num_availability_zones
   network_acl_id = aws_network_acl.public_nacl[count.index].id
   rule_number    = 101
   egress         = false
@@ -44,7 +44,7 @@ resource "aws_network_acl_rule" "allow_https_public" {
 }
 
 resource "aws_network_acl_rule" "allow_outbound_public" {
-  count          = 3
+  count          = var.num_availability_zones
   network_acl_id = aws_network_acl.public_nacl[count.index].id
   rule_number    = 102
   egress         = true
@@ -55,7 +55,7 @@ resource "aws_network_acl_rule" "allow_outbound_public" {
 
 # Rules for Private NACLs (Inbound, Outbound)
 resource "aws_network_acl_rule" "allow_inbound_private" {
-  count          = 3
+  count          = var.num_availability_zones * 3
   network_acl_id = aws_network_acl.private_nacl[count.index].id
   rule_number    = 100
   egress         = false
@@ -67,7 +67,7 @@ resource "aws_network_acl_rule" "allow_inbound_private" {
 }
 
 resource "aws_network_acl_rule" "allow_outbound_private" {
-  count          = 3
+  count          = var.num_availability_zones * 3
   network_acl_id = aws_network_acl.private_nacl[count.index].id
   rule_number    = 101
   egress         = true
