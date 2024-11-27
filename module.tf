@@ -1,8 +1,8 @@
 module "parameters_inclusion" {
   source             = "./code"                 
-  region                       = "us-west-1"    # Specify the region
+  region                       = "us-east-1"    # Specify the region
   cidr_block                   = "10.0.0.0/16"  # Main VPC CIDR block
-  num_availability_zones       = "2"            # Specify the required number
+  num_availability_zones       = "3"            # Specify the required number
   public_subnet_cidr_az1       = "10.0.1.0/24"  # CIDR for Public Subnet AZ1
   public_subnet_cidr_az2       = "10.0.2.0/24"  # CIDR for Public Subnet AZ2
   public_subnet_cidr_az3       = "10.0.12.0/24" # CIDR for Public Subnet AZ3
